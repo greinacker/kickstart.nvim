@@ -481,7 +481,14 @@ require('lazy').setup({
       -- Mason must be loaded before its dependents so we need to set it up here.
       -- NOTE: `opts = {}` is the same as calling `require('mason').setup({})`
       { 'mason-org/mason.nvim', opts = {} },
-      { 'mason-org/mason-lspconfig.nvim', opts = {} },
+      {
+        'mason-org/mason-lspconfig.nvim',
+        opts = {
+          automatic_enable = {
+            exclude = { 'stylua' },
+          },
+        },
+      },
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
       -- Useful status updates for LSP.
@@ -643,9 +650,13 @@ require('lazy').setup({
             },
             workspace = {
               checkThirdParty = false,
-              -- NOTE: this is a lot slower and will cause issues when working on your own configuration.
-              --  See https://github.com/neovim/nvim-lspconfig/issues/3189
-              library = vim.api.nvim_get_runtime_file('', true),
+              -- Keep LuaLS focused to avoid large startup indexing cost.
+              library = {
+                vim.env.VIMRUNTIME,
+                vim.fn.stdpath 'config' .. '/lua',
+              },
+              maxPreload = 1000,
+              preloadFileSize = 200,
             },
           })
         end,
